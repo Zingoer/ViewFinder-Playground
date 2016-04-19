@@ -1,7 +1,14 @@
 import Foundation
 import UIKit
 
+public enum ViewFinderMode{
+    case ShowFinderInParentViewCenterTranslucentNavBar
+    case ShowFinderInParentViewCenterNonTranslucentNavBar(navBarHeight:CGFloat)
+}
+
 public class ViewFinderPainter{
+    public var navBarHeight: CGFloat = 0
+    
     
     let frame: CGRect
     
@@ -32,7 +39,7 @@ public class ViewFinderPainter{
     
     var y: CGFloat{
         get{
-            return (pHeight - pWidth/ratio)/2
+            return (pHeight - pWidth/ratio)/2 - navBarHeight
         }
     }
     
@@ -48,32 +55,36 @@ public class ViewFinderPainter{
     public init(frame: CGRect){
         self.frame = frame
     }
-
-    public func createGrayMask() -> UIView{
+    
+    public func pickMode(mode: ViewFinderMode){
+        switch mode {
+        case .ShowFinderInParentViewCenterNonTranslucentNavBar(let height):
+            self.navBarHeight = height
+        default:
+            navBarHeight = 0
+        }
+    }
+    
+    public func createGrayMask() -> UIView {
         // Create a gray view
-        let gray = UIView(frame: CGRect(x: 0.0, y: 0.0, width: pWidth, height: pHeight))
+        let gray = UIView(frame: CGRect(x: 0.0, y: navBarHeight, width: pWidth, height: pHeight))
         gray.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(alpha)
         
         // Mask the view
-
+        
         let maskLayer = createMaskLayer()
         gray.layer.mask = maskLayer
-
-        let frameView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: pWidth, height: pHeight))
-        frameView.layer.addSublayer(createFrameLayer())
-        gray.addSubview(frameView)
-        
         gray.clipsToBounds = true
         return gray
     }
     
-    public func createFrame() -> UIView{
-        
-        let frameView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: pWidth, height: pHeight))
+    public func createFrame() -> UIView {
+        let frameView = UIView(frame: CGRect(x: 0.0, y: navBarHeight, width: pWidth, height: pHeight))
         frameView.layer.addSublayer(createFrameLayer())
         frameView.clipsToBounds = true
         return frameView
     }
+
     
     func createMaskLayer() -> CAShapeLayer{
         // Create mask sublayer
