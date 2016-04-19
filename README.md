@@ -1,0 +1,2 @@
+# ViewFinder-Playground
+A playground to experiment and create viewfinder effect for camera/image view
